@@ -1,0 +1,21 @@
+---
+epel_url: https://dl.fedoraproject.org/pub/epel/epel-release-latest-7.noarch.rpm
+remi_url: http://rpms.famillecollet.com/enterprise/remi-release-7.rpm
+
+php_pkgs:
+  - php
+  - php-mysql
+  - php-mcrypt
+
+php_dest: /etc/php.ini
+php_tz: '"Asia/Tokyo"'
+
+phpmyadmin1_src: /home/ec2-user/ansible/pMA_AWS/roles/3.apache/files/phpMyAdmin.conf
+phpmyadmin1_dest: /etc/httpd/conf.d/phpMyAdmin.conf
+phpmyadmin2_src: /home/ec2-user/ansible/pMA_AWS/roles/3.apache/files/config.inc.php
+phpmyadmin2_dest: /etc/phpMyAdmin/config.inc.php
+
+aws:
+  common:
+    region: ap-northeast-1
+  

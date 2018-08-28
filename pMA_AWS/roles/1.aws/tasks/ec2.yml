@@ -1,0 +1,59 @@
+---
+
+- name: Security Group取得
+  ec2_group_facts:
+    region: "{{ aws.common.region }}"
+    filters:
+      "tag:Name": "{{ aws.vpc.security_group.web.name }}"
+  register: ec2_group_facts
+  check_mode: no
+
+- name: Get Security GroupID
+  debug: var=ec2_group_facts.security_groups[0].group_id
+    #var: "{{ ec2_group_facts.security_groups[0].group_id }}"
+
+- name: Subnet取得
+  ec2_vpc_subnet_facts:
+    region: "{{ aws.common.region }}"
+    filters:
+      "tag:Name": "{{ aws.vpc.subnet.pub.subnet1.tags.Name }}"
+  register: ec2_subnet_facts_pub1
+  check_mode: no
+
+- name: Get SubnetID
+  debug: var=ec2_subnet_facts_pub1.subnets[0].id
+    #var: "{{ ec2_subnet_facts.pri1.subnets[0].id }}"
+
+- name: Launch instance
+  ec2:
+    key_name: "{{ aws.ec2.keypair }}"
+    group_id: "{{ ec2_group_facts.security_groups[0].group_id }}"
+    instance_type: "{{ aws.ec2.instance_type }}"
+    instance_tags: "{{ aws.ec2.instance_tags }}"
+    image: "{{ aws.ec2.image }}"
+    wait: true
+    region: "{{ aws.common.region }}"
+    vpc_subnet_id: "{{ ec2_subnet_facts_pub1.subnets[0].id }}"
+    #instance_profile_name="{{ instance_profile_name }}"
+    #with_items: "{{ aws.ec2  }}" #使用不可
+  register: ec2
+
+- name: Get PrivateIP
+  debug: var=ec2.instances[0].public_ip
+    #with_items: ec2.instances[0]
+
+#- name: Get PrivateIP
+#  debug: var=ec2.instances[0]
+
+- name: Add new instance to host group
+  add_host:
+    hostname: "{{ ec2.instances[0].public_ip }}"  #"{{ item.value.private_ip }}"
+    groups: WebSubnet1
+    #with_items: ec2.instances[0]
+
+- name: wait for ssh
+  wait_for:
+    host: "{{ ec2.instances[0].public_ip }}" #"{{ item.value.public_ip }}"
+    port: 22
+    timeout: 300
+#  with_dict: "{{ ec2.tagged_instances[0] }}"

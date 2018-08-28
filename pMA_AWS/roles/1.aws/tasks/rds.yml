@@ -1,0 +1,83 @@
+---
+## 既存のセキュリティグループ IDの取得タスク
+## ec2_group_factsモジュールを使用
+- name: "Get Security Group ID"
+  ec2_group_facts:
+    region: "{{ aws.common.region }}"
+    filters:
+      group-name: "{{ aws.vpc.security_group.rdb.name }}"
+  register: rds_sg_fact
+
+- name: "Show Security Group ID"
+  debug: var=rds_sg_fact.security_groups[0].group_id
+
+##すべてのPrivateSubnetの表示
+#- name: debug
+#  debug:
+#    msg: "item={{ item.value.tags.Name }}"
+#  with_dict: "{{ aws.vpc.subnet.pri }}"
+
+# 既存のサブネット IDの取得
+## ec2_vpc_subnet_factsモジュールを使用
+- name: "Get VPC Subnet ID 1"
+  ec2_vpc_subnet_facts:
+    region: "{{ aws.common.region }}"
+    filters:
+      "tag:Name": "{{ item.value.tags.Name }}"
+  with_dict: "{{ aws.vpc.subnet.pri }}"
+  register: rds_subnet_fact
+
+- name: "Show Subnet ID using for DBSubnet Group  "
+  debug:
+    msg:
+     - "{{ rds_subnet_fact.results[0].subnets[0].id }}"
+     - "{{ rds_subnet_fact.results[1].subnets[0].id }}"
+
+# RDSサブネットグループの作成
+## rds_subnet_groupモジュールを使用
+- name: "Make RDS Subnet Group"
+  rds_subnet_group:
+    state: present
+    name: "{{ aws.rds.subnet_grp.name }}"
+    description: My DB Subnet Group
+    region: "{{ aws.common.region }}"
+    subnets:
+      - "{{ rds_subnet_fact.results[0].subnets[0].id }}"
+      - "{{ rds_subnet_fact.results[1].subnets[0].id }}"
+  register: rds_subnet_group_fact
+
+- name: "Show RDS Subnet Group Name "
+  debug: var=aws.rds.subnet_grp.name
+
+# RDSの起動
+## rdsモジュールを使用
+- name: "Create RDS Instance"
+  rds:
+    command: create
+    instance_name: "{{ aws.rds.rds_name }}"
+    username: "{{ aws.rds.db_user }}"
+    password: "{{ aws.rds.db_password }}"
+    db_name: "{{ aws.rds.db_name }}"
+    zone: "{{ aws.rds.aws_zone }}"
+    subnet: "{{ aws.rds.subnet_grp.name }}"
+    region: "{{ aws.common.region }}"
+    vpc_security_groups: "{{ rds_sg_fact.security_groups[0].group_id }}"
+    db_engine: MySQL
+    instance_type: "{{ aws.rds.instance }}"
+    size: "{{ aws.rds.size }}"
+  register: rds_info_fact
+  tags: rds
+
+- name: "Show RDS Instance's Domain "
+  debug: var=rds_info_fact.instance.endpoint
+
+- name: "Get RDS Instance's Domain"
+  rds_instance_facts:
+    region: "{{ aws.common.region }}"
+    db_instance_identifier: ansibledb
+#    filters:
+#      "db-instance-id": "{{ rds_info_fact.instance }}"
+  register: database_facts
+
+- name: "Show Subnet ID using for DBSubnet Group  "
+  debug: var=database_facts.instances[0].endpoint

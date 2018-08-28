@@ -1,0 +1,33 @@
+---
+
+##変数を作成するべき。
+#timezone: Asia/Tokyo
+#lang: ja_JP.utf8
+
+- name: Install libselinux-python
+  yum: 
+    name: libselinux-python
+    state: latest
+
+- name: Configure / SELinux Permissived
+  selinux:
+    policy: targeted
+    state: disabled
+
+- name: Set Timezone
+  timezone:
+    name: Asia/Tokyo
+
+- name: Show locale Setting
+  debug:
+    var: ansible_env.LANG
+
+- name: Change locale Setting
+  command: localectl set-locale LANG=ja_JP.utf8
+  when: ansible_env.LANG != "ja_JP.utf8"
+
+- name: Configure / Update Yum Packages
+  yum:
+    name: '*'
+    state: latest
+    update_cache: yes

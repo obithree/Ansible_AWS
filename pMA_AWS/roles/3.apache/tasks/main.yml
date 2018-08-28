@@ -1,0 +1,85 @@
+---
+- name: apacheのインストール
+  yum: name=httpd state=latest
+
+- name: EPELリポジトリをインストール
+  yum:
+    name: "{{ epel_url }}"
+    state: present
+
+- name: remiリポジトリをインストール
+  yum:
+    name: "{{ remi_url }}"
+#    name: http://rpms.famillecollet.com/enterprise/remi-release-7.rpm
+    state: present
+
+#- name: remiリポジトリをインストール
+#  yum: name=http://rpms.famillecollet.com/enterprise/remi-release-7.rpm
+
+- name: phpのインストール
+  yum:
+    name: "{{ php_pkgs }}"
+    state: latest
+#    enablerepo: remi
+
+- name: phpmyadminのインストール
+  yum:
+    name: phpmyadmin
+    state: latest
+#    enablerepo: remi
+
+- name: PHPのタイムゾーンの設定
+  ini_file:
+    dest: "{{ php_dest }}"
+    section: Date
+    option: date.timezone
+    value: "{{ php_tz }}"
+
+- name: configure_phpmyadmin1
+  copy:
+    src: "{{ phpmyadmin1_src }}"
+    dest: "{{ phpmyadmin1_dest }}"
+    owner: root
+    group: root
+    mode: 0644
+
+
+- name: configure_phpmyadmin2
+  copy:
+    src: "{{ phpmyadmin2_src }}"
+    dest: "{{ phpmyadmin2_dest }}"
+    owner: root
+    group: root
+    mode: 0644
+
+- name: "Get RDS Instance's Domain"
+  local_action:
+    module: rds_instance_facts
+    region: "{{ aws.common.region }}"
+    db_instance_identifier: "ansibledb"
+  until: (rds_facts.instances[0].db_instance_status == "available") or
+         (rds_facts.instances[0].db_instance_status == "backing-up")
+  retries: 60
+  delay: 10
+  register: rds_facts
+
+- name: "Show Subnet ID using for DBSubnet Group  "
+  debug: var=rds_facts.instances[0].endpoint
+
+- name: Connect phpMyAdmin for RDS
+  replace:
+    path: "{{ phpmyadmin2_dest }}"
+    regexp: 'ReplaceName_RDSDatabase'
+    replace: "{{ rds_facts.instances[0].endpoint.address }}"
+    backup: no
+
+- name: "Show Subnet ID using for DBSubnet Group  "
+  debug: var=rds_facts.instances[0].endpoint.address
+
+- name: Apache（httpd）の起動
+  service:
+    name: httpd
+    state: started
+    enabled: yes
+
+...

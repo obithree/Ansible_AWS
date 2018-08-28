@@ -1,0 +1,22 @@
+---
+
+- name: Create AWS Network
+  hosts: localhost
+  gather_facts: False
+  roles:
+    - name: 1.aws
+
+- name: EC2 Common Configure
+  hosts: WebSubnet1
+  remote_user: ec2-user
+  become: yes
+  gather_facts: True
+  roles:
+    - name: 2.common
+
+- name: Install phpMyAdmin for EC2
+  hosts: WebSubnet1  ##WebServer
+  remote_user: ec2-user
+  become: yes ##sudoによって実行される
+  roles:
+    - name: 3.apache
