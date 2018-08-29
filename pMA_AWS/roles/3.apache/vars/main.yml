@@ -1,20 +1,39 @@
 ---
+###3.apacheの変数ファイル
+
+##リポジトリのURL
+#epelリポジトリのURL
 epel_url: https://dl.fedoraproject.org/pub/epel/epel-release-latest-7.noarch.rpm
+#remiリポジトリのURL
 remi_url: http://rpms.famillecollet.com/enterprise/remi-release-7.rpm
 
+##PHP
+#インストールするもの
 php_pkgs:
   - php
   - php-mysql
   - php-mcrypt
 
+#phpの設定ファイルのパス
 php_dest: /etc/php.ini
+
+#phpのタイムゾーンの設定
 php_tz: '"Asia/Tokyo"'
 
-phpmyadmin1_src: /home/ec2-user/ansible/pMA_AWS/roles/3.apache/files/phpMyAdmin.conf
+##phpMyAdmin
+#phpMyAdminの設定ファイル1のコピー元
+phpmyadmin1_src: "{{ inventory_dir }}/roles/3.apache/files/phpMyAdmin.conf"
+
+#phpMyAdminの設定ファイル1のコピー先
 phpmyadmin1_dest: /etc/httpd/conf.d/phpMyAdmin.conf
-phpmyadmin2_src: /home/ec2-user/ansible/pMA_AWS/roles/3.apache/files/config.inc.php
+
+#phpMyAdminの設定ファイル1のコピー元
+phpmyadmin2_src: "{{ inventory_dir }}/roles/3.apache/files/config.inc.php"
+
+#phpMyAdminの設定ファイル2のコピー先
 phpmyadmin2_dest: /etc/phpMyAdmin/config.inc.php
 
+##AWSから情報を拾ってくるときに使うもの
 aws:
   common:
     region: ap-northeast-1

@@ -1,6 +1,6 @@
 ---
-
-- name: Security Group取得
+#セキュリティグループの作成
+- name: Get Security GroupID
   ec2_group_facts:
     region: "{{ aws.common.region }}"
     filters:
@@ -8,23 +8,30 @@
   register: ec2_group_facts
   check_mode: no
 
-- name: Get Security GroupID
+#作成したセキュリティグループのIDを表示
+- name: Show Security GroupID created now
   debug: var=ec2_group_facts.security_groups[0].group_id
     #var: "{{ ec2_group_facts.security_groups[0].group_id }}"
 
-- name: Subnet取得
+#パブリックサブネットの作成
+- name: Get Public Subnet
   ec2_vpc_subnet_facts:
     region: "{{ aws.common.region }}"
     filters:
-      "tag:Name": "{{ aws.vpc.subnet.pub.subnet1.tags.Name }}"
-  register: ec2_subnet_facts_pub1
+      "tag:Name": "{{ item.value.tags.Name }}"
+  with_dict: "{{ aws.vpc.subnet.pub }}"
+  register: ec2_subnet_facts_pub
   check_mode: no
 
-- name: Get SubnetID
-  debug: var=ec2_subnet_facts_pub1.subnets[0].id
-    #var: "{{ ec2_subnet_facts.pri1.subnets[0].id }}"
+#作成したサブネットの、IDを表示
+- name: Show SubnetID created now
+  debug:
+    msg:
+     - "{{ ec2_subnet_facts_pub.subnets[0].id }}"
+     - "{{ ec2_subnet_facts.pub.subnets[1].id }}
 
-- name: Launch instance
+#EC2インスタンスの構築(Public)
+- name: Launch EC2 Instance created now
   ec2:
     key_name: "{{ aws.ec2.keypair }}"
     group_id: "{{ ec2_group_facts.security_groups[0].group_id }}"
@@ -33,25 +40,52 @@
     image: "{{ aws.ec2.image }}"
     wait: true
     region: "{{ aws.common.region }}"
-    vpc_subnet_id: "{{ ec2_subnet_facts_pub1.subnets[0].id }}"
-    #instance_profile_name="{{ instance_profile_name }}"
-    #with_items: "{{ aws.ec2  }}" #使用不可
+    vpc_subnet_id: "{{ item.value.id }}"
+    count_tag: "{{ aws.ec2.instance_tags }}"
+    exact_count: 2
+  with_dict: "{{ ec2_subnet_facts_pub }}"
   register: ec2
 
-- name: Get PrivateIP
-  debug: var=ec2.instances[0].public_ip
+#作成したEC2インスタンスのパブリックIPを表示
+- name: Show Public IP with new EC2
+  debug:
+    msg:
+     - "{{ item.value.public_ip }}"
     #with_items: ec2.instances[0]
+  with_dict: "{{ ec2 }}"
 
-#- name: Get PrivateIP
+#作成したEC2インスタンスのプライベートIPを表示
+#- name: Get PrivateIP with new EC2
 #  debug: var=ec2.instances[0]
 
-- name: Add new instance to host group
-  add_host:
-    hostname: "{{ ec2.instances[0].public_ip }}"  #"{{ item.value.private_ip }}"
-    groups: WebSubnet1
-    #with_items: ec2.instances[0]
+- name: Deside WebSubnet1
+   ec2_instance_facts:
+     filters:
+       subnet-id: "{{ ec2_subnet_facts_pub.subnets[0].id }}"
+     register: ec2_instance_facts_pub1
 
-- name: wait for ssh
+- name: Deside WebSubnet2
+   ec2_instance_facts:
+     filters:
+       subnet-id: "{{ ec2_subnet_facts_pub.subnets[1].id }}"
+     register: ec2_instance_facts_pub2
+
+#ホストグループ:WebSubnet1に新しいEC2のパブリックIPを追加する。
+- name: Add new EC2 Instance to host WebSubnet1
+  add_host:
+    hostname: "{{ item.value.public_ip }}"
+    groups: WebSubnet1
+    with_dict: ec2_instance_facts_pub1
+
+#ホストグループ:WebSubnet2に新しいEC2のパブリックIPを追加する。
+- name: Add new EC2 Instance to host WebSubnet2
+  add_host:
+    hostname: "{{ item.value.public_ip }}"
+    groups: WebSubnet2
+    with_dict: ec2_instance_facts_pub2
+
+#SSH接続が可能になるまで待機する。
+- name: Wait for SSH
   wait_for:
     host: "{{ ec2.instances[0].public_ip }}" #"{{ item.value.public_ip }}"
     port: 22

@@ -1,4 +1,7 @@
 ---
+###1.aws変数ファイル
+
+##AWS用の変数
 aws:
   common:
     region: ap-northeast-1
@@ -71,7 +74,7 @@ aws:
     keypair: mykey  #＜キーペア名＞
     instance_type: t2.micro  #＜インスタンスタイプ＞
     instance_profile_name: forDNS-Step  # ＜IAM ロール名＞
-    instance_tags: "Name='Test Ansible',Desc='Sample Ansible Playbook" #＜Tag＞ "
+    instance_tags: "Name='Ansible EC2',Desc='Ansible EC2 Desc" #＜Tag＞ "
     image: ami-e99f4896  # ＜AMI ID＞
     #vpc_subnet_id: subnet-0398a1d5354a89473
     #security_group: sg-0be9af49b02a1fe2e   # ＜セキュリティグループID＞
