@@ -18,7 +18,11 @@ phpmyadmin2_src: /home/ec2-user/ansible/pMA_AWS/roles/3.apache/files/config.inc.
 
 また、playbookを実行するサーバにIAMロールといった権限が必要です。
 
+<<<<<<< HEAD
 CentOS上でやる場合、AWSCLIをインストールし、aws configureで権限を与える必要があり>ます。
+=======
+CentOS上でやる場合、AWSCLIをインストールし、aws configureで権限を与える必要があります。
+>>>>>>> origin/master
 
 細かな実行環境は後日記入します。
 playbookの解説も後日コメントアウトで入れえる予定です。
