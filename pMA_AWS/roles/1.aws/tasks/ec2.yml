@@ -27,8 +27,10 @@
 - name: Show SubnetID created now
   debug:
     msg:
-     - "{{ ec2_subnet_facts_pub.results[0].subnets[0].id}}"
-     - "{{ ec2_subnet_facts_pub.results[1].subnets[0].id}}"
+     - "{{ item.subnets[0].id }}"
+#     - "{{ ec2_subnet_facts_pub.results[0].subnets[0].id}}"
+#     - "{{ ec2_subnet_facts_pub.results[1].subnets[0].id}}"
+  with_items: "{{ ec2_subnet_facts_pub.results }}"
 
 #EC2インスタンスの構築(Public)
 - name: Launch EC2 Instance created now
@@ -41,19 +43,20 @@
     image: "{{ aws.ec2.image }}"
     wait: true
     region: "{{ aws.common.region }}"
-#    vpc_subnet_id: "{{ item.value.subnets[0].id }}"
-    vpc_subnet_id: "{{ ec2_subnet_facts_pub.results[0].subnets[0].id }}"
+    vpc_subnet_id: "{{ item.subnets[0].id }}"
+#    vpc_subnet_id: "{{ ec2_subnet_facts_pub.results[0].subnets[0].id }}"
     count_tag: 
       Name: '{{ aws.ec2.instance_tags.Name }}'
     exact_count: 2
-  #with_dict: "{{ ec2_subnet_facts_pub }}"
+  with_items: "{{ ec2_subnet_facts_pub.results }}"
   register: ec2
 
 #作成したEC2インスタンスのパブリックIPを表示
-- name: Show Public IP with new EC2
-  debug:
-    msg:
-     - "{{ ec2.tagged_instances[0].public_ip }}"
+#- name: Show Public IP with new EC2
+#  debug:
+#    msg:
+#     - "{{ ec2 }}"
+#     - "{{ ec2.tagged_instances[0].public_ip }}"
 
 #     - "{{ item.value.public_ip }}"
     #with_items: ec2.instances[0]
@@ -74,7 +77,7 @@
       subnet-id: "{{ ec2_subnet_facts_pub.results[0].subnets[0].id}}"
 ##with_dictでresults[0],[1]をループできない。
 #      sunbet-id: "{{ item.value.subnets[0].id }}"
-#  with_dict: "{{ ec2_subnet_facts_pub }}"
+#  with_items: "{{ ec2_subnet_facts_pub.results }}"
   register: ec2_instance_facts_pub1
 
 - name: Deside WebSubnet2
@@ -82,13 +85,17 @@
     region: "{{ aws.common.region }}"
     filters:
       subnet-id: "{{ ec2_subnet_facts_pub.results[1].subnets[0].id}}"
+#      sunbet-id: "{{ item.value.subnets[0].id }}"
+#  with_items: "{{ ec2_subnet_facts_pub.results }}"
   register: ec2_instance_facts_pub2
+
 
 - name: debug Deside WebSubnet1
   debug:
     msg:
      - "{{ ec2_instance_facts_pub1.instances[0].public_ip_address }}"
      - "{{ ec2_instance_facts_pub1.instances[1].public_ip_address }}"
+
 #with_dictでinstances[0][1][2]...のようにループさせたい。
 
 #ホストグループ:WebSubnet1に新しいEC2のパブリックIPを追加する。
@@ -100,17 +107,23 @@
   with_items: "{{ ec2_instance_facts_pub1.instances }}"
 
 #ホストグループ:WebSubnet2に新しいEC2のパブリックIPを追加する。
-#- name: Add new EC2 Instance to host WebSubnet2
-#  add_host:
-#    hostname: "{{ item.public_ip_address  }}"
-#    groups: WebSubnet2
-#  with_dict: "{{ ec2_instance_facts_pub2.instances }}"
+- name: Add new EC2 Instance to host WebSubnet2
+  add_host:
+    hostname: "{{ item.public_ip_address  }}"
+    groups: WebSubnet2
+  with_items: "{{ ec2_instance_facts_pub2.instances }}"
+
+- name: debug Host Group
+  debug:
+    msg:
+     - "{{ groups  }}"
+
 
 #SSH接続が可能になるまで待機する。
 - name: Wait for SSH
   wait_for:
 #    host: "{{ ec2_instance_facts_pub1.instances[0].public_ip_address }}"
-    host: "{{ item.public_ip_address }}"
+    host: "{{ item }}"
     port: 22
     timeout: 300
-  with_items: "{{ ec2_instance_facts_pub1.instances }}"
+  with_items: "{{ groups.WebServer }}"

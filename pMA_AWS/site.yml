@@ -7,7 +7,7 @@
     - name: 1.aws
 
 - name: EC2 Common Configure
-  hosts: WebSubnet1
+  hosts: WebServer
   remote_user: ec2-user
   become: yes
   gather_facts: True
@@ -15,7 +15,7 @@
     - name: 2.common
 
 - name: Install phpMyAdmin for EC2
-  hosts: WebSubnet1  ##WebServer
+  hosts: WebServer  ##WebServer
   remote_user: ec2-user
   become: yes ##sudoによって実行される
   roles:
