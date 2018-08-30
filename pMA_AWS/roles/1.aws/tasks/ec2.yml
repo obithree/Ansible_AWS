@@ -66,13 +66,13 @@
 - name: Deside WebSubnet1
   ec2_instance_facts:
     filters:
-      "Name=subnet-id,Value={{ ec2_subnet_facts_pub.results[0].subnets[0].id}}"
+      "Name=subnet-id,Values={{ ec2_subnet_facts_pub.results[0].subnets[0].id}}"
     register: ec2_instance_facts_pub1
 
 - name: Deside WebSubnet2
   ec2_instance_facts:
     filters:
-      "Name=subnet-id,Value={{ ec2_subnet_facts_pub.results[1].subnets[0].id}}"
+      "Name=subnet-id,Values={{ ec2_subnet_facts_pub.results[1].subnets[0].id}}"
     register: ec2_instance_facts_pub2
 
 - name: debug Deside WebSubnet1
