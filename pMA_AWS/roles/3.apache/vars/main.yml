@@ -22,13 +22,16 @@ php_tz: '"Asia/Tokyo"'
 
 ##phpMyAdmin
 #phpMyAdminの設定ファイル1のコピー元
-phpmyadmin1_src: "{{ inventory_dir }}/roles/3.apache/files/phpMyAdmin.conf"
+#マジック変数"inventory_dir"とあわせて使う
+#"inventory_dir"で"inventory.ini(roles)"が配置されているディレクトリのパスを取得
+#それ以降のものをsrc変数に入っているパスで追記している。
+phpmyadmin1_src: /roles/3.apache/files/phpMyAdmin.conf
 
 #phpMyAdminの設定ファイル1のコピー先
 phpmyadmin1_dest: /etc/httpd/conf.d/phpMyAdmin.conf
 
 #phpMyAdminの設定ファイル1のコピー元
-phpmyadmin2_src: "{{ inventory_dir }}/roles/3.apache/files/config.inc.php"
+phpmyadmin2_src: /roles/3.apache/files/config.inc.php
 
 #phpMyAdminの設定ファイル2のコピー先
 phpmyadmin2_dest: /etc/phpMyAdmin/config.inc.php

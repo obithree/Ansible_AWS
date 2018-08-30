@@ -33,7 +33,7 @@
 
 - name: configure_phpmyadmin1
   copy:
-    src: "{{ phpmyadmin1_src }}"
+    src: "{{ inventory_dir }}/{{ phpmyadmin1_src }}"
     dest: "{{ phpmyadmin1_dest }}"
     owner: root
     group: root
@@ -42,7 +42,7 @@
 
 - name: configure_phpmyadmin2
   copy:
-    src: "{{ phpmyadmin2_src }}"
+    src: "{{ inventory_dir }}/{{ phpmyadmin2_src }}"
     dest: "{{ phpmyadmin2_dest }}"
     owner: root
     group: root
