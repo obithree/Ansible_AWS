@@ -31,23 +31,6 @@
     option: date.timezone
     value: "{{ php_tz }}"
 
-- name: configure_phpmyadmin1
-  copy:
-    src: "{{ inventory_dir }}/{{ phpmyadmin1_src }}"
-    dest: "{{ phpmyadmin1_dest }}"
-    owner: root
-    group: root
-    mode: 0644
-
-
-- name: configure_phpmyadmin2
-  copy:
-    src: "{{ inventory_dir }}/{{ phpmyadmin2_src }}"
-    dest: "{{ phpmyadmin2_dest }}"
-    owner: root
-    group: root
-    mode: 0644
-
 - name: "Get RDS Instance's Domain"
   local_action:
     module: rds_instance_facts
@@ -62,15 +45,28 @@
 - name: "Show Subnet ID using for DBSubnet Group  "
   debug: var=rds_facts.instances[0].endpoint
 
-- name: Connect phpMyAdmin for RDS
-  replace:
-    path: "{{ phpmyadmin2_dest }}"
-    regexp: 'ReplaceName_RDSDatabase'
-    replace: "{{ rds_facts.instances[0].endpoint.address }}"
-    backup: no
+- name: Configure phpMyAdmin1 "/etc/httpd/conf.d/phpMyAdmin.conf"
+  template:
+    src: phpMyAdmin.conf
+    dest: "{{ phpmyadmin1_dest }}"
+    owner: root
+    group: root
+    mode: 0644
 
-- name: "Show Subnet ID using for DBSubnet Group  "
-  debug: var=rds_facts.instances[0].endpoint.address
+- name: Configure phpMyAdmin2 "/etc/phpMyAdmin/config.inc.php"
+  template:
+    src: config.inc.php
+    dest: "{{ phpmyadmin2_dest }}"
+    owner: root
+    group: root
+    mode: 0644
+
+#- name: Connect phpMyAdmin for RDS
+#  replace:
+#    path: "{{ phpmyadmin2_dest }}"
+#    regexp: 'ReplaceName_RDSDatabase'
+#    replace: "{{ rds_facts.instances[0].endpoint.address }}"
+#    backup: no
 
 - name: Apache（httpd）の起動
   service:
