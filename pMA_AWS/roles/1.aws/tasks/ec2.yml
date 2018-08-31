@@ -1,4 +1,10 @@
 ---
+#作成したEC2インスタンスのパブリックIPを表示
+- name: Show Public IP with new EC2
+  debug:
+    msg:
+     - "{{ security_group_web }}"
+
 #セキュリティグループの作成
 - name: Get Security GroupID
   ec2_group_facts:
@@ -47,7 +53,7 @@
 #    vpc_subnet_id: "{{ ec2_subnet_facts_pub.results[0].subnets[0].id }}"
     count_tag: 
       Name: '{{ aws.ec2.instance_tags.Name }}'
-    exact_count: 2
+    exact_count: "{{ aws.ec2.exact_count }}"
   with_items: "{{ ec2_subnet_facts_pub.results }}"
   register: ec2
 
@@ -94,7 +100,7 @@
   debug:
     msg:
      - "{{ ec2_instance_facts_pub1.instances[0].public_ip_address }}"
-     - "{{ ec2_instance_facts_pub1.instances[1].public_ip_address }}"
+     - "{{ ec2_instance_facts_pub2.instances[0].public_ip_address }}"
 
 #with_dictでinstances[0][1][2]...のようにループさせたい。
 

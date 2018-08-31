@@ -1,4 +1,5 @@
 ---
+
 - name: apacheのインストール
   yum: name=httpd state=latest
 

@@ -20,3 +20,9 @@
   become: yes ##sudoによって実行される
   roles:
     - name: 3.apache
+
+- name: Create ELB
+  hosts: localhost
+  gather_facts: False
+  roles:
+    - name: 4.elb
