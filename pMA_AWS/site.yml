@@ -6,23 +6,35 @@
   roles:
     - name: 1.aws
 
+- name: Create RDS
+  hosts: localhost
+  gather_facts: False
+  roles:
+    - name: 2.rds
+
+- name: Create EC2
+  hosts: localhost
+  gather_facts: False
+  roles:
+    - name: 3.ec2
+
 - name: EC2 Common Configure
   hosts: WebServer
   remote_user: ec2-user
   become: yes
   gather_facts: True
   roles:
-    - name: 2.common
+    - name: 4.common
 
 - name: Install phpMyAdmin for EC2
   hosts: WebServer  ##WebServer
   remote_user: ec2-user
   become: yes ##sudoによって実行される
   roles:
-    - name: 3.apache
+    - name: 5.apache
 
 - name: Create ELB
   hosts: localhost
   gather_facts: False
   roles:
-    - name: 4.elb
+    - name: 6.elb
