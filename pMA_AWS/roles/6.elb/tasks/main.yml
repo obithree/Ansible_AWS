@@ -1,3 +1,13 @@
 ---
-- include_tasks: gathering.yml
+####elb_subnets.yml
+
+###1:elb_facts.yml 
+#ELBで使用するVPCとサブネットの情報を収集
+
+###2:elb.yml
+#ターゲットグループの作成、ELBの作成
+
+
+- include_tasks: elb_facts.yml
+- include_tasks: debug_elb_facts.yml
 - include_tasks: elb.yml

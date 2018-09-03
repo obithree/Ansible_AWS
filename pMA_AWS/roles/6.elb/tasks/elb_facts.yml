@@ -1,0 +1,44 @@
+---
+###1:elb_facts.yml
+#ELBで使用するVPCとサブネットとセキュリティグループの情報を収集
+#そして使用するサブネットに存在するすべてのインスタンスの情報を収集
+
+##ELB構築のために、使用するVPCの情報を収集
+###
+#
+- name: "Get VPC_ID for ELB to stand on"
+  ec2_vpc_net_facts:
+   region: "{{ aws.common.region }}" 
+   filters:
+      "tag:Name": "{{ aws.vpc.name }}"
+  register: elb_target_vpc
+
+
+
+##ELB構築のために、使用するサブネットの情報を収集
+##
+#
+- name: "Get Subnets_ID for ELB to stand on"
+  ec2_vpc_subnet_facts:
+    region: "{{ aws.common.region }}"
+    filters:
+      "tag:Name": "{{ item.value.tags.Name }}"
+  with_dict: "{{ aws.vpc.subnet.pub }}"
+  register: elb_target_subnets
+
+
+
+##使用するELBのセキュリティグループの情報を収集
+##
+
+- name: "Get Security Group ID for ELB"
+  ec2_group_facts:
+    region: "{{ aws.common.region }}"
+    filters:
+      group-name: "{{ aws.vpc.security_group.web.name }}"
+  register: elb_target_sg
+
+
+##ターゲットグループとなるEC2の情報を収集
+##
+

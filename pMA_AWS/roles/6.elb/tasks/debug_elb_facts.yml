@@ -1,0 +1,29 @@
+---
+
+- name: "Get EC2_ID for TargetGroup"
+  ec2_instance_facts:
+    region: "{{ aws.common.region }}"
+    filters:
+      "tag:Name": "{{ aws.ec2.instance_tags.Name }}"
+  register: elb_target_ec2
+
+
+- name: debug elb_target_subnets
+  debug:
+    msg:
+      - "{{ elb_target_vpc.vpcs[0].vpc_id }}"
+
+- name: debug elb_target_subnets
+  debug:
+    msg:
+      - "{{ elb_target_subnets.results[0].subnets[0].id }}"
+      - "{{ elb_target_subnets.results[1].subnets[0].id }}"
+
+- name: "Show Security Group ID"
+  debug: var=elb_target_sg.security_groups[0].group_id
+
+- name: debug elb_target_ec2
+  debug:
+    msg:
+     - "{{ item.instance_id  }}"
+  with_items: "{{ elb_target_ec2.instances }}"
