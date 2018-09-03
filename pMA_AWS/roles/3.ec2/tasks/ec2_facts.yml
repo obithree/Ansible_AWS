@@ -1,0 +1,24 @@
+---
+
+
+#WEBサーバに使用するセキュリティグループの情報を取得
+- name: Get Security GroupID
+  ec2_group_facts:
+    region: "{{ aws.common.region }}"
+    filters:
+      "tag:Name": "{{ aws.vpc.security_group.web.name }}"
+  register: ec2_group_facts
+  check_mode: no
+
+
+#WEBサーバに使用するパブリックサブネットの情報を取得
+- name: Get Public Subnet
+  ec2_vpc_subnet_facts:
+    region: "{{ aws.common.region }}"
+    filters:
+      "tag:Name": "{{ item.value.tags.Name }}"
+  with_dict: "{{ aws.vpc.subnet.pub }}"
+  register: ec2_subnet_facts_pub
+  check_mode: no
+
+

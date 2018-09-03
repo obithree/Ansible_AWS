@@ -1,78 +1,17 @@
 ---
 
-- name: apacheのインストール
-  yum: name=httpd state=latest
+###1:yum.yml
+#yumでインストールものをインストール
+#Apache PHP phpMyAdmin
+#PHPの設定をおこなう。
 
-- name: EPELリポジトリをインストール
-  yum:
-    name: "{{ epel_url }}"
-    state: present
+###2.pMA_configure.yml
+#RDSのドメインを取得する。
+#2つの設定ファイルをtemplateモジュールでコピーする。
 
-- name: remiリポジトリをインストール
-  yum:
-    name: "{{ remi_url }}"
-    state: present
+###3.start_apache.yml
+#apacheを起動する。
 
-- name: phpのインストール
-  yum:
-    name: "{{ php_pkgs }}"
-    state: latest
-#    enablerepo: remi
-
-- name: phpmyadminのインストール
-  yum:
-    name: phpmyadmin
-    state: latest
-#    enablerepo: remi
-
-- name: PHPのタイムゾーンの設定
-  ini_file:
-    dest: "{{ php_dest }}"
-    section: Date
-    option: date.timezone
-    value: "{{ php_tz }}"
-
-- name: "Get RDS Instance's Domain"
-  local_action:
-    module: rds_instance_facts
-    region: "{{ aws.common.region }}"
-    db_instance_identifier: "ansibledb"
-  until: (rds_facts.instances[0].db_instance_status == "available") or
-         (rds_facts.instances[0].db_instance_status == "backing-up")
-  retries: 60
-  delay: 10
-  register: rds_facts
-
-- name: "Show Subnet ID using for DBSubnet Group  "
-  debug: var=rds_facts.instances[0].endpoint
-
-- name: Configure phpMyAdmin1 "/etc/httpd/conf.d/phpMyAdmin.conf"
-  template:
-    src: phpMyAdmin.conf
-    dest: "{{ phpmyadmin1_dest }}"
-    owner: root
-    group: root
-    mode: 0644
-
-- name: Configure phpMyAdmin2 "/etc/phpMyAdmin/config.inc.php"
-  template:
-    src: config.inc.php
-    dest: "{{ phpmyadmin2_dest }}"
-    owner: root
-    group: root
-    mode: 0644
-
-#- name: Connect phpMyAdmin for RDS
-#  replace:
-#    path: "{{ phpmyadmin2_dest }}"
-#    regexp: 'ReplaceName_RDSDatabase'
-#    replace: "{{ rds_facts.instances[0].endpoint.address }}"
-#    backup: no
-
-- name: Apache（httpd）の起動
-  service:
-    name: httpd
-    state: started
-    enabled: yes
-
-...
+- include_tasks: yum.yml
+- include_tasks: pMA_Configure.yml
+- include_tasks: start_apache.yml

@@ -1,0 +1,40 @@
+---
+
+###debug:debug_ec2.yml
+#EC2作成時のregisterから情報を表示する。
+#ホストグループの表示
+#基本的にここのファイルは無視でOK
+
+
+#作成したEC2インスタンスのパブリックIPを表示
+#- name: Show Public IP with new EC2
+#  debug:
+#    msg:
+#     - "{{ ec2 }}"
+#     - "{{ ec2.tagged_instances[0].public_ip }}"
+
+#     - "{{ item.value.public_ip }}"
+    #with_items: ec2.instances[0]
+#  with_dict: "{{ ec2 }}"
+
+#作成したEC2インスタンスのプライベートIPを表示
+#- name: Debug #Get PrivateIP with new EC2
+#  debug: 
+#    msg: 
+#     - ec2_subnet_facts_pub.results[0].subnets[0].id
+#  with_dict: 
+#  debug: var=ec2.instances[0]
+
+
+- name: debug Deside WebSubnet1
+  debug:
+    msg:
+     - "{{ ec2_instance_facts_pub1.instances[0].public_ip_address }}"
+     - "{{ ec2_instance_facts_pub2.instances[0].public_ip_address }}"
+#with_dictでinstances[0][1][2]...のようにループさせたい。
+#
+
+- name: debug Host Group
+  debug:
+    msg:
+     - "{{ groups  }}"

@@ -1,0 +1,34 @@
+---
+###1:yum.yml
+#yumでインストールものをインストール
+#Apache PHP phpMyAdmin
+#PHPの設定をおこなう。
+
+#Apacheのインストール
+- name: "Install Apache"
+  yum:
+    name: httpd
+    state: latest
+
+#PHPのインストール
+- name: "Install php and php DepTools"
+  yum:
+    name: "{{ php_pkgs }}"
+    state: latest
+#    enablerepo: remi
+
+#phpMyAdminのインストール
+- name: "Install phpMyAdmin"
+  yum:
+    name: phpmyadmin
+    state: latest
+#    enablerepo: remi
+
+#PHPのタイムゾーンの設定をおこなう。
+- name: " Configure php's Timezone"
+  ini_file:
+    dest: "{{ php_dest }}"
+    section: Date
+    option: date.timezone
+    value: "{{ php_tz }}"
+

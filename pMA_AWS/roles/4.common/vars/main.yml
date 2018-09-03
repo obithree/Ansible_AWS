@@ -1,0 +1,13 @@
+---
+
+common:
+  timezone: Asia/Tokyo
+
+  lang: ja_JP.utf8
+
+##リポジトリのURL
+#epelリポジトリのURL
+  repo:
+    epel_url: "https://dl.fedoraproject.org/pub/epel/epel-release-latest-7.noarch.rpm"
+#remiリポジトリのURL
+    remi_url: "http://rpms.famillecollet.com/enterprise/remi-release-7.rpm"

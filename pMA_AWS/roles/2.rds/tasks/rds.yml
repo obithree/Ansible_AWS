@@ -11,13 +11,11 @@
     name: "{{ aws.rds.subnet_grp.name }}"
     description: My DB Subnet Group
     region: "{{ aws.common.region }}"
+## factsから、2つのサブネットを指定
     subnets:
       - "{{ rds_subnet_fact.results[0].subnets[0].id }}"
       - "{{ rds_subnet_fact.results[1].subnets[0].id }}"
   register: rds_subnet_group_fact
-
-- name: "Show RDS Subnet Group Name "
-  debug: var=aws.rds.subnet_grp.name
 
 # RDSの起動
 ## rdsモジュールを使用

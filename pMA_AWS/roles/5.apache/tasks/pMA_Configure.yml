@@ -1,0 +1,43 @@
+---
+
+###2.pMA_configure
+#RDSのドメインを取得する。
+#2つの設定ファイルをtemplateモジュールでコピーする。
+
+##RDSのドメインを取得する。
+##インスタンスのステータスが"利用可能"か"バックアップ中"の時になるまで待つ。
+##それらになる頃にはドメインを取得している。
+##10秒ごとに問い合わせをし、60回までおこなうので、600秒まで待つことができる。
+
+- name: "Get RDS Instance's Domain"
+  local_action:
+    module: rds_instance_facts
+    region: "{{ aws.common.region }}"
+    db_instance_identifier: "ansibledb"
+  until: (rds_facts.instances[0].db_instance_status == "available") or
+         (rds_facts.instances[0].db_instance_status == "backing-up")
+  retries: 60
+  delay: 10
+  register: rds_facts
+
+##templateモジュールで、設定ファイルをコピーする。
+##DBのIPアドレス/ドメイン欄に変数を置いており、そこにRDSのドメインが入る。
+
+- name: Configure phpMyAdmin1 "/etc/httpd/conf.d/phpMyAdmin.conf"
+  template:
+    src: phpMyAdmin.conf
+    dest: "{{ phpmyadmin1_dest }}"
+    owner: root
+    group: root
+    mode: 0644
+
+- name: Configure phpMyAdmin2 "/etc/phpMyAdmin/config.inc.php"
+  template:
+    src: config.inc.php
+    dest: "{{ phpmyadmin2_dest }}"
+    owner: root
+    group: root
+    mode: 0644
+
+
+...

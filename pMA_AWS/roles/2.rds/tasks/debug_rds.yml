@@ -1,7 +1,11 @@
 ---
 ###debug:rds_facts.yml
+#作成したサブネットグループを表示する
 #RDSのドメインを表示しようとするもの
 #作成してすぐにはドメインが発行されないので、このymlは使用しない。
+
+- name: "Show RDS Subnet Group Name "
+  debug: var=aws.rds.subnet_grp.name
 
 - name: "Show RDS Instance's Domain "
   debug: var=rds_info_fact.instance.endpoint

@@ -1,0 +1,10 @@
+---
+##3.start_apache.yml
+#apacheを起動する。
+
+
+- name: Apache（httpd）の起動
+  service:
+    name: httpd
+    state: started
+    enabled: yes

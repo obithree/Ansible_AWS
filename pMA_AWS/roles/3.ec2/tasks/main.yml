@@ -1,0 +1,23 @@
+---
+####3.ec2流れ
+###1.ec2_facts.yml
+#EC2インスタンスを構築するサブネットと、使用するSGの情報を取得する。
+###2.ec2.yml
+#EC2インスタンスを構築する。
+###3.add_host.yml
+#ホストグループWebSubnet1と2に、それぞれ構築したEC2のパブリックIPをいれる。
+#その後、SSH接続ができるまで待機する。
+
+###debug:debug_ec2_facts.yml
+#factsで取得したSGとサブネットの情報を表示する
+
+###debug:debug_ec2.yml
+#EC2作成時のregisterから情報を表示する。
+#ホストグループの表示
+#基本的にここのファイルは無視でよい。
+
+- include_tasks: ec2_facts.yml
+#- include_tasks: debug_ec2_facts.yml
+- include_tasks: ec2.yml
+- include_tasks: add_host.yml
+#- include_tasks: debug_ec2.yml

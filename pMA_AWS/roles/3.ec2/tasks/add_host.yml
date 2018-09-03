@@ -1,0 +1,44 @@
+---
+
+###3.add_host.yml
+##ホストグループWebSubnet1と2にあたるものを検索し、情報を得る。
+##ホストグループWebSubnet1と2に、それぞれ構築したEC2のパブリックIPをいれる。
+##その後、SSH接続ができるまで待機する。
+
+#1つ目のパブリックサブネットに所属するEC2インスタンスの情報を取得
+- name: Deside WebSubnet1
+  ec2_instance_facts:
+    region: "{{ aws.common.region }}"
+    filters:
+      subnet-id: "{{ ec2_subnet_facts_pub.results[0].subnets[0].id}}"
+  register: ec2_instance_facts_pub1
+
+#2つ目のパブリックサブネットに所属するEC2インスタンスの情報を取得
+- name: Deside WebSubnet2
+  ec2_instance_facts:
+    region: "{{ aws.common.region }}"
+    filters:
+      subnet-id: "{{ ec2_subnet_facts_pub.results[1].subnets[0].id}}"
+  register: ec2_instance_facts_pub2
+
+#ホストグループ:WebSubnet1に新しいEC2のパブリックIPを追加する。
+- name: Add new EC2 Instance to host WebSubnet1
+  add_host:
+    hostname: "{{ item.public_ip_address }}"
+    groups: WebSubnet1
+  with_items: "{{ ec2_instance_facts_pub1.instances }}"
+
+#ホストグループ:WebSubnet2に新しいEC2のパブリックIPを追加する。
+- name: Add new EC2 Instance to host WebSubnet2
+  add_host:
+    hostname: "{{ item.public_ip_address  }}"
+    groups: WebSubnet2
+  with_items: "{{ ec2_instance_facts_pub2.instances }}"
+
+#SSH接続が可能になるまで待機する。
+- name: Wait for SSH
+  wait_for:
+    host: "{{ item }}"
+    port: 22
+    timeout: 300
+  with_items: "{{ groups.WebServer }}"

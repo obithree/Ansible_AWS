@@ -1,33 +1,52 @@
 ---
 
-##変数を作成するべき。
-#timezone: Asia/Tokyo
-#lang: ja_JP.utf8
+###4.common.yml:main.yml
 
+#Ansibleから、SELinuxの設定を変更できるように、"libselinux-python"をインストール
 - name: Install libselinux-python
   yum: 
     name: libselinux-python
     state: latest
-
-- name: Configure / SELinux Permissived
+#SELinuxを"disabled"にして無効に。
+- name: Configure / SELinux Disabled
   selinux:
     policy: targeted
     state: disabled
 
+#タイムゾーンを変更する
 - name: Set Timezone
   timezone:
-    name: Asia/Tokyo
+    name: "{{ common.timezone }}"
 
-- name: Show locale Setting
-  debug:
-    var: ansible_env.LANG
+##localeの設定を確認する。
+#- name: Show locale Setting
+#  debug:
+#    msg:
+#     - "{{ ansible_env.LANG }}"
+#     - "{{ common.lang }}"
 
+#localeの設定を変更する。
+#もし、すでの設定先のLANGだった場合スキップする。
 - name: Change locale Setting
-  command: localectl set-locale LANG=ja_JP.utf8
-  when: ansible_env.LANG != "ja_JP.utf8"
+  command: localectl set-locale LANG={{ common.lang }}
+  when: ansible_env.LANG != common.lang
+  register: locale_facts
 
+#YUMのアップデートを行う。
 - name: Configure / Update Yum Packages
   yum:
     name: '*'
     state: latest
     update_cache: yes
+
+#EPELレポジトリのダウンロード
+- name: Get EPEL Repository
+  yum:
+    name: "{{ common.repo.epel_url }}"
+    state: present
+
+#Remiレポジトリのタウンロード
+- name: Get Remi Repository
+  yum:
+    name: "{{ common.repo.remi_url }}"
+    state: present
