@@ -2,18 +2,21 @@
 
 - name: Create AWS Network
   hosts: localhost
+  connection: local
   gather_facts: False
   roles:
     - name: 1.aws
 
 - name: Create RDS
   hosts: localhost
+  connection: local
   gather_facts: False
   roles:
     - name: 2.rds
 
 - name: Create EC2
   hosts: localhost
+  connection: local
   gather_facts: False
   roles:
     - name: 3.ec2
@@ -35,6 +38,7 @@
 
 - name: Create ELB
   hosts: localhost
+  connection: local
   gather_facts: False
   roles:
     - name: 6.elb
