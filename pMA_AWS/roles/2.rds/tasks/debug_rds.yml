@@ -1,0 +1,18 @@
+---
+###debug:rds_facts.yml
+#RDSのドメインを表示しようとするもの
+#作成してすぐにはドメインが発行されないので、このymlは使用しない。
+
+- name: "Show RDS Instance's Domain "
+  debug: var=rds_info_fact.instance.endpoint
+
+- name: "Get RDS Instance's Domain"
+  rds_instance_facts:
+    region: "{{ aws.common.region }}"
+    db_instance_identifier: ansibledb
+#    filters:
+#      "db-instance-id": "{{ rds_info_fact.instance }}"
+  register: database_facts
+
+- name: "Show Subnet ID using for DBSubnet Group  "
+  debug: var=database_facts.instances[0].endpoint

@@ -1,0 +1,15 @@
+---
+
+###5.vpc_facts.yml
+#セキュリティグループ作成のため、vpcの情報を取得する。
+#VPCのネームタグで検索している。
+#check_modeはオフ
+#これをオンにすると、サーバに状態を変更しないようにスキップする。
+
+- name: vpc_id取得
+  ec2_vpc_net_facts:
+    region: "{{ aws.common.region }}"
+    filters:
+      "tag:Name": "{{ aws.vpc.name }}"
+  register: vpc_net_fact
+  check_mode: no

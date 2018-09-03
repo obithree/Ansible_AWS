@@ -1,0 +1,40 @@
+---
+###6.sg.yml
+#Web用とDB用のセキュリティグループをそれぞれ作成する。
+
+###解説
+##ec2_groupモジュールを使用
+#  ec2_group:
+#    name: 名前・変数：group_varsから
+#    description: 説明・変数：group_varsから
+#    tags:　タグ
+#      Name: ネームタグ・変数：group_varsから
+#    vpc_id: VPCのID・変数：vpc_factsから
+#    region: リージョン・変数：group_varsから
+#    purge_rules: ルールに見つからないセキュリティグループの既存のルールを削除する
+#    rules: SGのルール・変数：group_varsから
+#  register: security_group_web 変数使用先：なし
+  
+- name: Web Security Group作成
+  ec2_group:
+    name: "{{ aws.vpc.security_group.web.name }}"
+    description: "{{ aws.vpc.security_group.web.description }}"
+    tags:
+      Name: "{{ aws.vpc.security_group.web.name }}"
+    vpc_id: "{{ vpc_net_fact.vpcs[0].id }}"
+    region: "{{ aws.common.region }}"
+    purge_rules: yes
+    rules: "{{ aws.vpc.security_group.web.rules }}"
+  register: security_group_web
+
+- name: RDB Security Group作成
+  ec2_group:
+    name: "{{ aws.vpc.security_group.rdb.name }}"
+    description: "{{ aws.vpc.security_group.rdb.description }}"
+    tags:
+      Name: "{{ aws.vpc.security_group.rdb.name }}"
+    vpc_id: "{{ vpc_net_fact.vpcs[0].id }}"
+    region: "{{ aws.common.region }}"
+    purge_rules: "{{ aws.vpc.security_group.rdb.purge_rules|default(False) }}"
+    rules: "{{ aws.vpc.security_group.rdb.rules }}"
+  register: security_group_rdb

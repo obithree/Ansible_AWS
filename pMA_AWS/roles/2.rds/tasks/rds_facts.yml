@@ -1,0 +1,26 @@
+---
+###1:rds_facts.yml
+#サブネットグループ作成の際に必要なサブネットのIDの取得
+#RDSに付けるセキュリティグループのIDの取得
+
+## 既存のセキュリティグループ IDの取得タスク
+## ec2_group_factsモジュールを使用
+- name: "Get Security Group ID"
+  ec2_group_facts:
+    region: "{{ aws.common.region }}"
+    filters:
+      group-name: "{{ aws.vpc.security_group.rdb.name }}"
+  register: rds_sg_fact
+
+
+## 既存のサブネット IDの取得
+## ec2_vpc_subnet_factsモジュールを使用
+- name: "Get VPC Subnet ID 1"
+  ec2_vpc_subnet_facts:
+    region: "{{ aws.common.region }}"
+    filters:
+      "tag:Name": "{{ item.value.tags.Name }}"
+  with_dict: "{{ aws.vpc.subnet.pri }}"
+  register: rds_subnet_fact
+
+

@@ -1,0 +1,13 @@
+---
+
+###2:ig.yml
+#インターネットゲートウェイを作成する
+
+- name: Internet Gateway作成
+  ec2_vpc_igw:
+    region: "{{ aws.common.region }}"
+    vpc_id: "{{ vpc_net.vpc.id }}"
+    tags: "{{ aws.vpc.igw.tags }}"
+    state: present
+  register: vpc_igw
+

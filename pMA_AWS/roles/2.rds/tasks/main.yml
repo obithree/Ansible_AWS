@@ -1,0 +1,21 @@
+---
+####2.rds流れ
+###1:rds_facts.yml
+#サブネットグループ作成の際に必要なサブネットのIDの取得
+#RDSに付けるセキュリティグループのIDの取得
+###2:rds.yml
+#サブネットグループの作成、RDSの作成
+
+###debug:debug_rds_facts.yml
+#rds_facts.ymlのregisterから拾った情報を表示する。
+#サブネットグループに使用するサブネットのIDの表示
+#RDSに使用するセキュリティグループを表示
+
+###debug:rds_facts.yml
+#RDSのドメインを表示しようとするもの
+#作成してすぐにはドメインが発行されないので、このymlは使用しない。
+
+- include_tasks: rds_facts.yml
+#- include_tasks: debug_rds_facts.yml
+- include_tasks: rds.yml
+#- include_tasks: debug_rds.yml

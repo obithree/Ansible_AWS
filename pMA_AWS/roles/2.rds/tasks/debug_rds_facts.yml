@@ -1,0 +1,14 @@
+---
+###debug:debug_rds_facts.yml
+#rds_facts.ymlのregisterから拾った情報を表示する。
+#サブネットグループに使用するサブネットのIDの表示
+#RDSに使用するセキュリティグループを表示
+
+- name: "Show Security Group ID"
+  debug: var=rds_sg_fact.security_groups[0].group_id
+
+- name: "Show Subnet ID using for DBSubnet Group  "
+  debug:
+    msg:
+     - "{{ rds_subnet_fact.results[0].subnets[0].id }}"
+     - "{{ rds_subnet_fact.results[1].subnets[0].id }}"

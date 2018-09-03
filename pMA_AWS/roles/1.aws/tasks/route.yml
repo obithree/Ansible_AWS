@@ -1,0 +1,29 @@
+---
+
+###4.route.yml
+#パブリックサブネットと、プライベートサブネット用のルートテーブルをそれぞれ作成
+
+- name: Public Route Table作成
+  ec2_vpc_route_table:
+    vpc_id: "{{ vpc_net.vpc.id }}"
+    region: "{{ aws.common.region }}"
+    tags: "{{ aws.vpc.route_table.pub.tags }}"
+    subnets: "{{ vpc_subnet_pub.results | map(attribute='subnet.id') | list }}"
+    routes:
+      - dest: 0.0.0.0/0
+        gateway_id: "{{ vpc_igw.gateway_id }}"
+      - dest: "{{ vpc_net.vpc.cidr_block }}"
+        gateway_id: local
+  register: route_table_pub
+
+- name: Private Route Table作成
+  ec2_vpc_route_table:
+    vpc_id: "{{ vpc_net.vpc.id }}"
+    region: "{{ aws.common.region }}"
+    tags: "{{ aws.vpc.route_table.pri.tags }}"
+    subnets: "{{ vpc_subnet_pri.results | map(attribute='subnet.id') | list }}"
+    routes:
+      - dest: "{{ vpc_net.vpc.cidr_block }}"
+        gateway_id: local
+  register: route_table_pri
+

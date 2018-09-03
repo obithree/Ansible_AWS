@@ -1,4 +1,22 @@
 ---
+
+####1.aws流れ
+###1:vpc.yml
+#vpcを作成する
+###2:ig.yml
+#インターネットゲートウェイを作成する
+###3:subnets.yml
+#パブリックサブネットとプライベートサブネットを2つずつ作成する
+###4.route.yml
+#パブリックサブネットと、プライベートサブネット用のルートテーブルをそれぞれ作成
+###5.vpc_facts.yml
+#セキュリティグループ作成のため、vpcの情報を取得する。
+###6.sg.yml
+#Web用とDB用のセキュリティグループをそれぞれ作成する。
+
 - include_tasks: vpc.yml
-- include_tasks: rds.yml
-- include_tasks: ec2.yml
+- include_tasks: ig.yml
+- include_tasks: subnets.yml
+- include_tasks: route.yml
+- include_tasks: vpc_facts.yml
+- include_tasks: sg.yml

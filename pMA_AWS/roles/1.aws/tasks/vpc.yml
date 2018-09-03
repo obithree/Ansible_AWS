@@ -1,5 +1,8 @@
 ---
 
+###1:vpc.yml
+#vpcを作成する
+
 - name: VPC作成
   ec2_vpc_net:
     name: "{{ aws.vpc.name }}"
@@ -8,94 +11,3 @@
     tags: "{{ aws.vpc.tags }}"
     tenancy: default
   register: vpc_net
-
-- name: Internet Gateway作成
-  ec2_vpc_igw:
-    region: "{{ aws.common.region }}"
-    vpc_id: "{{ vpc_net.vpc.id }}"
-    tags: "{{ aws.vpc.igw.tags }}"
-    state: present
-  register: vpc_igw
-
-- name: Public Subnet作成
-  ec2_vpc_subnet:
-    region: "{{ aws.common.region }}"
-    state: present
-    vpc_id: "{{ vpc_net.vpc.id }}"
-    az: "{{ aws.common.region }}{{ item.value.zone }}"
-    cidr: "{{ item.value.cidr }}"
-    map_public: "{{ item.value.map_public|default(True) }}"
-    tags: "{{ item.value.tags }}"
-  with_dict: "{{ aws.vpc.subnet.pub }}"
-  register: vpc_subnet_pub
-
-- name: Private Subnet作成
-  ec2_vpc_subnet:
-    region: "{{ aws.common.region }}"
-    state: present
-    vpc_id: "{{ vpc_net.vpc.id }}"
-    az: "{{ aws.common.region }}{{ item.value.zone }}"
-    cidr: "{{ item.value.cidr }}"
-    map_public: "{{ item.value.map_public|default(false) }}"
-    tags: "{{ item.value.tags }}"
-  with_dict: "{{ aws.vpc.subnet.pri }}"
-  register: vpc_subnet_pri
-
-
-- name: Public Route Table作成
-  ec2_vpc_route_table:
-    vpc_id: "{{ vpc_net.vpc.id }}"
-    region: "{{ aws.common.region }}"
-    tags: "{{ aws.vpc.route_table.pub.tags }}"
-    subnets: "{{ vpc_subnet_pub.results | map(attribute='subnet.id') | list }}"
-    routes:
-      - dest: 0.0.0.0/0
-        gateway_id: "{{ vpc_igw.gateway_id }}"
-      - dest: "{{ vpc_net.vpc.cidr_block }}"
-        gateway_id: local
-  register: route_table_pub
-
-- name: Private Route Table作成
-  ec2_vpc_route_table:
-    vpc_id: "{{ vpc_net.vpc.id }}"
-    region: "{{ aws.common.region }}"
-    tags: "{{ aws.vpc.route_table.pri.tags }}"
-    subnets: "{{ vpc_subnet_pri.results | map(attribute='subnet.id') | list }}"
-    routes:
-      - dest: "{{ vpc_net.vpc.cidr_block }}"
-        gateway_id: local
-  register: route_table_pri
-
-
-- name: vpc_id取得
-  ec2_vpc_net_facts:
-    region: "{{ aws.common.region }}"
-    filters:
-      "tag:Name": "{{ aws.vpc.name }}"
-  register: vpc_net_fact
-  check_mode: no
-
-- name: Web Security Group作成
-  ec2_group:
-    name: "{{ aws.vpc.security_group.web.name }}"
-    description: "{{ aws.vpc.security_group.web.description }}"
-    tags:
-      Name: "{{ aws.vpc.security_group.web.name }}"
-    vpc_id: "{{ vpc_net_fact.vpcs[0].id }}"
-    region: "{{ aws.common.region }}"
-    purge_rules: "{{ aws.vpc.security_group.web.purge_rules|default(False) }}"
-    rules: "{{ aws.vpc.security_group.web.rules }}"
-  register: security_group_web
-
-- name: RDB Security Group作成
-  ec2_group:
-    name: "{{ aws.vpc.security_group.rdb.name }}"
-    description: "{{ aws.vpc.security_group.rdb.description }}"
-    tags:
-      Name: "{{ aws.vpc.security_group.rdb.name }}"
-    vpc_id: "{{ vpc_net_fact.vpcs[0].id }}"
-    region: "{{ aws.common.region }}"
-    purge_rules: "{{ aws.vpc.security_group.rdb.purge_rules|default(False) }}"
-    rules: "{{ aws.vpc.security_group.rdb.rules }}"
-  register: security_group_rdb
-
