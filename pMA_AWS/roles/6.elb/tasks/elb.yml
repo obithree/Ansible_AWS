@@ -25,6 +25,8 @@
 #      - Id: i-044fc1638ee8cc760
 #        Port: 80
     state: present
+    wait_timeout: 200
+    wait: True
 
 ##ELBを作成する
 #種類はALB
@@ -45,3 +47,4 @@
           - Type: forward # Required. Only 'forward' is accepted at this time
             TargetGroupName: "{{ aws.elb.target_group.name }}" # Required. The name of the target group
     state: present
+    wait: yes

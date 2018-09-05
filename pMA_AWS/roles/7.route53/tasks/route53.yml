@@ -1,0 +1,17 @@
+---
+
+- name:
+    route53
+      state: present
+      zone: "{{ aws.route53.domain }}"
+      record: "{{ aws.route53.sub_domain }}.{{aws.route53.domain}}"
+      type: A
+      ttl: "{{ aws.route53.ttl }}"
+      value: "{{ elb_dns_name }}" #factsでもってくる
+      alias: True
+      alias_hosted_zone_id: "{{ elb_zone_id }}"
+      alias_evaluate_target_health: yes
+      failover: PRIMARY
+      wait: yes
+      overwrite: yes
+
