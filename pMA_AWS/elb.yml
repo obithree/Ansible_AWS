@@ -2,6 +2,8 @@
 - name: Create elb
   hosts: localhost
   gather_facts: False
+  connection: local
   roles:
-    - name: 4.elb
+    - name: 6.elb
+
 

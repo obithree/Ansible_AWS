@@ -14,6 +14,11 @@
   register: elb_target_vpc
 
 
+- name:
+  debug:
+    msg:
+     - "{{ elb_target_vpc.vpcs[0].vpc_id }}"
+
 
 ##ELB構築のために、使用するサブネットの情報を収集
 ##

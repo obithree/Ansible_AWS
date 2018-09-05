@@ -1,4 +1,5 @@
 ---
+
 ###2:elb.yml
 #ターゲットグループの作成、ELBの作成
 
@@ -12,7 +13,8 @@
     region: "{{ aws.common.region }}"
     protocol: http
     port: 80
-    vpc_id: "{{ elb_target_vpc.vpcs[0].vpc_id }}"
+#    vpc_id: "{{ elb_target_vpc.vpcs[0].vpc_id }}"
+    vpc_id: "vpc-09ce8c724cc3565d9"
     health_check_path: /phpobiadmin
     successful_response_codes: "200,300-400"
     targets:
